@@ -1,0 +1,361 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Ornano Intelligence — Veille Tech</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@300;400;500&family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,600;1,9..144,300&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg:#0b0b0f;--bg2:#13131a;--bg3:#1c1c26;
+  --border:rgba(255,255,255,0.06);--border2:rgba(255,255,255,0.1);
+  --text:#e8e8f0;--muted:#5a5a70;--muted2:#8a8a9a;
+  --accent:#7c6af7;--accent2:#4fd1c5;--accent3:#f6ad55;
+  --danger:#fc8181;--success:#68d391;--info:#63b3ed;
+  --mono:'DM Mono',monospace;--serif:'Fraunces',serif;
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+html,body{height:100%;background:var(--bg);color:var(--text);font-family:var(--mono);overflow:hidden;}
+.app{display:grid;grid-template-columns:240px 1fr;grid-template-rows:52px 1fr;height:100vh;}
+.topbar{grid-column:1/-1;background:var(--bg2);border-bottom:0.5px solid var(--border2);display:flex;align-items:center;padding:0 20px;gap:16px;}
+.topbar-logo{font-family:var(--serif);font-size:16px;font-weight:600;color:var(--text);}
+.topbar-logo span{color:var(--accent);font-style:italic;}
+.topbar-right{margin-left:auto;display:flex;align-items:center;gap:12px;}
+.status-dot{width:6px;height:6px;border-radius:50%;background:var(--success);animation:pulse 2s infinite;}
+@keyframes pulse{0%,100%{opacity:1;}50%{opacity:0.3;}}
+.status-text{font-size:10px;color:var(--success);letter-spacing:1px;}
+.topbar-date{font-size:10px;color:var(--muted);letter-spacing:1px;}
+.sidebar{background:var(--bg2);border-right:0.5px solid var(--border2);display:flex;flex-direction:column;overflow-y:auto;}
+.sidebar-section{padding:12px 16px 6px;font-size:9px;color:var(--muted);letter-spacing:3px;text-transform:uppercase;}
+.company-item{display:flex;align-items:center;gap:8px;padding:8px 16px;cursor:pointer;transition:all 0.15s;border-left:2px solid transparent;}
+.company-item:hover{background:rgba(255,255,255,0.03);}
+.company-item.active{border-left-color:var(--accent);background:rgba(124,106,247,0.08);}
+.company-dot{width:7px;height:7px;border-radius:50%;flex-shrink:0;}
+.company-name{font-size:12px;color:var(--muted2);flex:1;}
+.company-item.active .company-name{color:var(--text);}
+.company-badge{font-size:9px;padding:2px 5px;border-radius:3px;}
+.badge-agnt{background:rgba(104,211,145,0.15);color:var(--success);}
+.badge-watch{background:rgba(99,179,237,0.15);color:var(--info);}
+.badge-risk{background:rgba(252,129,129,0.15);color:var(--danger);}
+.sidebar-footer{padding:12px;border-top:0.5px solid var(--border);margin-top:auto;}
+.scan-all-btn{width:100%;padding:9px;background:var(--accent);border:none;border-radius:6px;color:white;font-family:var(--mono);font-size:10px;letter-spacing:2px;cursor:pointer;transition:opacity 0.15s;margin-bottom:6px;}
+.scan-all-btn:hover{opacity:0.85;}
+.scan-all-btn:disabled{opacity:0.4;cursor:not-allowed;}
+.main{overflow-y:auto;}
+.feed-view,.company-view{padding:20px;display:flex;flex-direction:column;gap:16px;}
+.feed-title{font-family:var(--serif);font-size:26px;font-weight:300;font-style:italic;}
+.news-card{background:var(--bg2);border:0.5px solid var(--border);border-radius:8px;padding:14px 18px;}
+.news-meta{display:flex;align-items:center;gap:8px;margin-bottom:7px;flex-wrap:wrap;}
+.news-company-tag{font-size:9px;padding:2px 7px;border-radius:3px;background:rgba(124,106,247,0.15);color:var(--accent);letter-spacing:1px;}
+.news-time{font-size:10px;color:var(--muted);}
+.news-impact{font-size:9px;padding:2px 7px;border-radius:3px;margin-left:auto;}
+.impact-high{background:rgba(252,129,129,0.15);color:var(--danger);}
+.impact-med{background:rgba(246,173,85,0.15);color:var(--accent3);}
+.impact-low{background:rgba(104,211,145,0.15);color:var(--success);}
+.news-title{font-size:13px;color:var(--text);margin-bottom:5px;line-height:1.5;}
+.news-analysis{font-size:11px;color:var(--muted2);line-height:1.65;}
+.news-laws{display:flex;gap:5px;margin-top:7px;flex-wrap:wrap;}
+.law-tag{font-size:9px;padding:2px 6px;border-radius:3px;background:rgba(124,106,247,0.1);color:var(--accent);}
+.company-header-main{display:flex;align-items:flex-start;justify-content:space-between;padding-bottom:16px;border-bottom:0.5px solid var(--border2);}
+.company-title{font-family:var(--serif);font-size:32px;font-weight:300;font-style:italic;}
+.company-desc{font-size:11px;color:var(--muted2);margin-top:4px;line-height:1.6;}
+.score-display{text-align:right;}
+.score-num{font-family:var(--serif);font-size:44px;font-weight:300;line-height:1;}
+.score-verdict-big{font-size:10px;letter-spacing:2px;margin-top:3px;}
+.laws-row{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;}
+.law-mini{background:var(--bg2);border:0.5px solid var(--border);border-radius:8px;padding:12px;}
+.law-mini-name{font-size:9px;letter-spacing:2px;color:var(--muted);text-transform:uppercase;margin-bottom:6px;}
+.law-mini-score{font-family:var(--serif);font-size:26px;font-weight:300;margin-bottom:4px;}
+.law-mini-bar{height:2px;background:var(--bg3);border-radius:1px;overflow:hidden;margin-bottom:7px;}
+.law-mini-fill{height:100%;border-radius:1px;transition:width 0.6s;}
+.law-mini-text{font-size:10px;color:var(--muted2);line-height:1.6;}
+.section-label{font-size:9px;letter-spacing:3px;text-transform:uppercase;color:var(--muted);display:flex;align-items:center;gap:10px;}
+.section-label::after{content:'';flex:1;height:0.5px;background:var(--border);}
+.scan-one-btn{padding:7px 14px;background:transparent;border:0.5px solid var(--border2);border-radius:6px;color:var(--muted2);font-family:var(--mono);font-size:10px;letter-spacing:1px;cursor:pointer;transition:all 0.15s;}
+.scan-one-btn:hover{border-color:var(--accent);color:var(--accent);}
+.scan-one-btn:disabled{opacity:0.4;cursor:not-allowed;}
+.loading-bar{height:2px;background:var(--bg3);border-radius:1px;overflow:hidden;margin-bottom:10px;}
+.loading-fill{height:100%;background:linear-gradient(90deg,transparent,var(--accent),transparent);animation:slide 1.5s infinite;}
+@keyframes slide{from{transform:translateX(-100%);}to{transform:translateX(200%);}}
+.loading-text{font-size:11px;color:var(--muted);letter-spacing:2px;}
+.empty-state{display:flex;flex-direction:column;align-items:center;justify-content:center;height:60vh;gap:12px;color:var(--muted);}
+.empty-icon{font-size:36px;opacity:0.3;}
+.empty-text{font-size:11px;letter-spacing:2px;text-transform:uppercase;}
+.rec-box{background:var(--bg2);border:0.5px solid var(--border);border-radius:8px;padding:16px;}
+</style>
+</head>
+<body>
+<div class="app">
+  <div class="topbar">
+    <div class="topbar-logo">Ornano <span>Intelligence</span></div>
+    <div class="topbar-right">
+      <div class="status-dot"></div>
+      <div class="status-text">EN LIGNE</div>
+      <div class="topbar-date" id="topbar-date"></div>
+    </div>
+  </div>
+
+  <div class="sidebar">
+    <div class="sidebar-section">Vue globale</div>
+    <div class="company-item active" onclick="showFeed(this)">
+      <div class="company-dot" style="background:var(--accent)"></div>
+      <div class="company-name">Toutes les actus</div>
+    </div>
+    <div class="sidebar-section">Sociétés suivies</div>
+    <div id="company-list"></div>
+    <div class="sidebar-footer">
+      <button class="scan-all-btn" id="scan-all-btn" onclick="scanAll()">⟳ Tout scanner</button>
+    </div>
+  </div>
+
+  <div class="main" id="main">
+    <div class="empty-state">
+      <div class="empty-icon">◈</div>
+      <div class="empty-text">Sélectionne une société ou lance un scan</div>
+    </div>
+  </div>
+</div>
+
+<script>
+const COMPANIES = [
+  {name:'Doctolib',sector:'Healthtech',color:'#4fd1c5'},
+  {name:'Salesforce',sector:'CRM / Enterprise',color:'#7c6af7'},
+  {name:'Mistral AI',sector:'Foundation Models',color:'#f6ad55'},
+  {name:'Anthropic',sector:'Foundation Models',color:'#fc8181'},
+  {name:'OpenAI',sector:'Foundation Models',color:'#68d391'},
+  {name:'Pennylane',sector:'Fintech B2B',color:'#63b3ed'},
+  {name:'Notion',sector:'Productivity',color:'#b794f4'},
+  {name:'Cursor',sector:'AI Coding',color:'#fbb6ce'},
+];
+
+let companyData = JSON.parse(localStorage.getItem('ornano_v2') || '{}');
+let currentView = 'feed';
+let currentCompany = null;
+let isScanning = false;
+
+function getApiKey() {
+  let key = localStorage.getItem('ornano_key');
+  if (!key) { key = prompt('Clé API Anthropic (sk-ant-...) :'); if (key) localStorage.setItem('ornano_key', key); }
+  return key;
+}
+
+function initDate() {
+  document.getElementById('topbar-date').textContent = new Date().toLocaleDateString('fr-FR',{weekday:'short',day:'numeric',month:'short'}).toUpperCase();
+}
+
+function initSidebar() {
+  document.getElementById('company-list').innerHTML = COMPANIES.map((c,i) => {
+    const d = companyData[c.name];
+    const v = d?.verdict_now || '';
+    const bc = v==='AGNT'?'badge-agnt':v==='AT_RISK'?'badge-risk':v==='WATCH'?'badge-watch':'';
+    return `<div class="company-item" onclick="showCompany('${c.name}',this)" id="item-${i}">
+      <div class="company-dot" style="background:${c.color}"></div>
+      <div class="company-name">${c.name}</div>
+      ${v?`<div class="company-badge ${bc}">${v}</div>`:''}
+    </div>`;
+  }).join('');
+}
+
+function showFeed(el) {
+  currentView='feed'; currentCompany=null;
+  document.querySelectorAll('.company-item').forEach(i=>i.classList.remove('active'));
+  el.classList.add('active');
+  renderFeed();
+}
+
+function showCompany(name, el) {
+  currentView='company'; currentCompany=name;
+  document.querySelectorAll('.company-item').forEach(i=>i.classList.remove('active'));
+  el.classList.add('active');
+  renderCompany(name);
+}
+
+function renderFeed() {
+  const allNews = [];
+  Object.entries(companyData).forEach(([company,data]) => {
+    (data.news||[]).forEach(n => allNews.push({...n,company}));
+  });
+  if (allNews.length===0) {
+    document.getElementById('main').innerHTML=`<div class="empty-state"><div class="empty-icon">◈</div><div class="empty-text">Lance un scan pour charger les actus</div></div>`;
+    return;
+  }
+  allNews.sort((a,b)=>(b.impact_score||0)-(a.impact_score||0));
+  document.getElementById('main').innerHTML=`<div class="feed-view">
+    <div style="display:flex;align-items:baseline;justify-content:space-between;">
+      <div class="feed-title">Actualités tech</div>
+      <div style="font-size:10px;color:var(--muted)">Mis à jour ${new Date().toLocaleTimeString('fr-FR',{hour:'2-digit',minute:'2-digit'})}</div>
+    </div>
+    ${allNews.map(n=>newsCard(n,true)).join('')}
+  </div>`;
+}
+
+function renderCompany(name) {
+  const data = companyData[name];
+  const company = COMPANIES.find(c=>c.name===name);
+  if (!data) {
+    document.getElementById('main').innerHTML=`<div class="company-view">
+      <div style="display:flex;align-items:center;justify-content:space-between;">
+        <div class="company-title">${name}</div>
+        <button class="scan-one-btn" onclick="scanOne('${name}')">⟳ Scanner ${name}</button>
+      </div>
+      <div class="empty-state" style="height:200px;"><div class="empty-icon" style="color:${company.color}">◉</div><div class="empty-text">Pas encore analysé</div></div>
+    </div>`;
+    return;
+  }
+  const total = (data.law1_score||0)+(data.law2_score||0)+(data.law3_score||0);
+  const vc = data.verdict_now==='AGNT'?'var(--success)':data.verdict_now==='AT_RISK'?'var(--danger)':'var(--info)';
+  document.getElementById('main').innerHTML=`<div class="company-view">
+    <div class="company-header-main">
+      <div>
+        <div class="company-title">${name}</div>
+        <div class="company-desc">${data.tagline||''} · ${company.sector}</div>
+      </div>
+      <div style="display:flex;flex-direction:column;align-items:flex-end;gap:8px;">
+        <div class="score-display">
+          <div class="score-num" style="color:${company.color}">${total}<span style="font-size:18px;color:var(--muted)">/9</span></div>
+          <div class="score-verdict-big" style="color:${vc}">${data.verdict_now||''}</div>
+        </div>
+        <button class="scan-one-btn" id="scan-one-${name.replace(/\s/g,'-')}" onclick="scanOne('${name}')">⟳ Rescanner</button>
+      </div>
+    </div>
+    <div class="section-label">Three Laws</div>
+    <div class="laws-row">
+      ${[1,2,3].map(i=>`<div class="law-mini">
+        <div class="law-mini-name">${data['law'+i+'_name']||''}</div>
+        <div class="law-mini-score" style="color:${company.color}">${data['law'+i+'_score']||0}<span style="font-size:13px;color:var(--muted)">/3</span></div>
+        <div class="law-mini-bar"><div class="law-mini-fill" style="width:${((data['law'+i+'_score']||0)/3)*100}%;background:${company.color}"></div></div>
+        <div class="law-mini-text">${data['law'+i+'_analysis']||''}</div>
+      </div>`).join('')}
+    </div>
+    ${data.news&&data.news.length>0?`<div class="section-label">Actualités & impact</div>${data.news.map(n=>newsCard(n,false)).join('')}`:''}
+    ${data.recommendation?`<div class="rec-box"><div class="section-label" style="margin-bottom:10px;">Recommandation</div><div style="font-size:12px;color:var(--muted2);line-height:1.75;font-style:italic;">${data.recommendation}</div></div>`:''}
+  </div>`;
+}
+
+function newsCard(n, showCompany) {
+  const ic = (n.impact_score||0)>=8?'impact-high':(n.impact_score||0)>=5?'impact-med':'impact-low';
+  const il = (n.impact_score||0)>=8?'Fort':(n.impact_score||0)>=5?'Modéré':'Faible';
+  return `<div class="news-card">
+    <div class="news-meta">
+      ${showCompany?`<div class="news-company-tag">${n.company}</div>`:''}
+      <div class="news-time">${n.date||'Récent'}</div>
+      <div class="news-impact ${ic}" style="margin-left:auto">Impact ${il} ${n.impact_score?'('+n.impact_score+'/10)':''}</div>
+    </div>
+    <div class="news-title">${n.title}</div>
+    <div class="news-analysis">${n.impact_analysis||''}</div>
+    ${n.laws_affected&&n.laws_affected.length>0?`<div class="news-laws">${n.laws_affected.map(l=>`<div class="law-tag">${l}</div>`).join('')}</div>`:''}
+  </div>`;
+}
+
+function getPrompt(company) {
+  return `Analyste senior, framework Orchestration Economics de Raphaëlle d'Ornano.
+
+Analyse "${company.name}" (${company.sector}). Recherche 3 actualités récentes importantes.
+
+JSON uniquement, concis :
+{"tagline":"8 mots max","verdict_now":"AGNT","law1_name":"Proximity to Intent","law1_score":2,"law1_analysis":"1-2 phrases","law2_name":"Context Depth","law2_score":2,"law2_analysis":"1-2 phrases","law3_name":"Workflow Intelligence","law3_score":2,"law3_analysis":"1-2 phrases","recommendation":"2 phrases","news":[{"title":"Titre","date":"mois année","impact_score":7,"impact_analysis":"1-2 phrases sur impact framework","laws_affected":["Proximity to Intent"]}]}
+
+IMPORTANT: verdict_now = AGNT, AT_RISK ou WATCH. Maximum 3 news. JSON valide uniquement, pas de texte avant ou après.`;
+}
+
+async function callAPI(prompt) {
+  const key = getApiKey();
+  if (!key) return null;
+  const r = await fetch('https://api.anthropic.com/v1/messages', {
+    method:'POST',
+    headers:{'Content-Type':'application/json','x-api-key':key,'anthropic-version':'2023-06-01','anthropic-dangerous-direct-browser-access':'true'},
+    body:JSON.stringify({
+      model:'claude-sonnet-4-6',
+      max_tokens:1200,
+      tools:[{type:'web_search_20250305',name:'web_search'}],
+      messages:[{role:'user',content:prompt}]
+    })
+  });
+  if (!r.ok) throw new Error(`HTTP ${r.status}`);
+  const data = await r.json();
+  let text = '';
+  for (const block of (data.content||[])) { if (block.type==='text') text+=block.text; }
+  return text;
+}
+
+function parseJSON(text) {
+  const match = text.match(/\{[\s\S]*\}/);
+  if (!match) throw new Error('No JSON');
+  // Clean common issues
+  let clean = match[0].replace(/,(\s*[}\]])/g,'$1').replace(/[\u0000-\u001F\u007F-\u009F]/g,' ');
+  return JSON.parse(clean);
+}
+
+async function scanOne(name) {
+  if (isScanning) return;
+  const company = COMPANIES.find(c=>c.name===name);
+  if (!company) return;
+  isScanning = true;
+
+  const btnId = `scan-one-${name.replace(/\s/g,'-')}`;
+  const btn = document.getElementById(btnId);
+  if (btn) { btn.disabled=true; btn.textContent='Analyse...'; }
+
+  document.getElementById('main').innerHTML=`<div class="company-view">
+    <div class="company-title">${name}</div>
+    <div><div class="loading-bar"><div class="loading-fill"></div></div><div class="loading-text">Analyse de ${name} en cours...</div></div>
+  </div>`;
+
+  try {
+    const text = await callAPI(getPrompt(company));
+    if (text) {
+      const result = parseJSON(text);
+      companyData[name] = result;
+      localStorage.setItem('ornano_v2', JSON.stringify(companyData));
+    }
+  } catch(e) { console.error(name, e); }
+
+  isScanning = false;
+  initSidebar();
+  renderCompany(name);
+}
+
+async function scanAll() {
+  if (isScanning) return;
+  isScanning = true;
+  const btn = document.getElementById('scan-all-btn');
+  btn.disabled = true;
+
+  for (let i=0; i<COMPANIES.length; i++) {
+    const company = COMPANIES[i];
+    btn.textContent = `⟳ ${company.name} (${i+1}/${COMPANIES.length})`;
+
+    if (currentView==='feed') {
+      document.getElementById('main').innerHTML=`<div class="feed-view">
+        <div><div class="loading-bar"><div class="loading-fill"></div></div>
+        <div class="loading-text">Analyse ${company.name}... (${i+1}/${COMPANIES.length})</div></div>
+      </div>`;
+    }
+
+    try {
+      const text = await callAPI(getPrompt(company));
+      if (text) {
+        const result = parseJSON(text);
+        companyData[company.name] = result;
+        localStorage.setItem('ornano_v2', JSON.stringify(companyData));
+      }
+    } catch(e) { console.error(company.name, e); }
+
+    initSidebar();
+    // 4 secondes entre chaque appel pour éviter le rate limit
+    if (i < COMPANIES.length-1) await new Promise(r=>setTimeout(r,4000));
+  }
+
+  isScanning = false;
+  btn.disabled = false;
+  btn.textContent = '⟳ Tout scanner';
+  if (currentView==='feed') renderFeed();
+  else if (currentCompany) renderCompany(currentCompany);
+}
+
+initDate();
+initSidebar();
+if (Object.keys(companyData).length>0) renderFeed();
+</script>
+</body>
+</html>
